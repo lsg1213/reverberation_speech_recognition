@@ -1,4 +1,8 @@
 tensorboard_log/
+/**/*.model
+/**/*.vocab
+spm_input.txt
+save/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
