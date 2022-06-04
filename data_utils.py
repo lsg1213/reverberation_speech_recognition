@@ -25,10 +25,20 @@ class Word_process():
         self.sp.Load(f'{self.prefix}.model')
 
     def encode(self, sentence: str):
-        return self.sp.EncodeAsIds(sentence)
+        ids = self.sp.EncodeAsIds(sentence)
+        return [1] + [i for i in ids if i != 0] + [2]
 
-    def decode(self, Ids):
-        return self.sp.Decode(Ids)
+    def decode(self, Ids: list):
+        raw = [1] + Ids + [2]
+        try:
+            st = raw.index(1)
+            end = raw.index(2)
+        except ValueError:
+            return ''
+        if st >= end:
+            return ''
+        raw = raw[st+1:end]
+        return self.sp.Decode([i for i in raw if i != 0])
 
 
 class Librispeech(LIBRISPEECH):
@@ -41,7 +51,6 @@ class Librispeech(LIBRISPEECH):
     def __getitem__(self, n: int):
         fileid = self._walker[n]
         speaker_id, chapter_id, utterance_id = fileid.split("-")
-        
 
         file_text = speaker_id + "-" + chapter_id + self._ext_txt
         file_text = os.path.join(self._path, speaker_id, chapter_id, file_text)

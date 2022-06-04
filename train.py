@@ -1,4 +1,3 @@
-from argparse import ArgumentError
 from math import ceil
 import os
 
@@ -11,7 +10,6 @@ import numpy as np
 from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader
 from torch.optim import Adam
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 from tqdm import tqdm
 import torchaudio
 from transformers import get_scheduler
@@ -129,8 +127,8 @@ def main(config):
 
     callbacks = []
 
-    callbacks.append(EarlyStopping(monitor="val_score", mode="min", patience=config.max_patience, verbose=True))
-    callbacks.append(Checkpoint(checkpoint_dir=os.path.join(savepath, 'checkpoint.pt'), monitor='val_score', mode='min', verbose=True))
+    callbacks.append(EarlyStopping(monitor="val_loss", mode="min", patience=config.max_patience, verbose=True))
+    callbacks.append(Checkpoint(checkpoint_dir=os.path.join(savepath, 'checkpoint.pt'), monitor='val_loss', mode='min', verbose=True))
     criterion = torch.nn.CTCLoss()
     metric = WER(Word_process())
 
@@ -188,7 +186,7 @@ def main(config):
                     model = model.to(device)
                     model.eval()
                     with torch.no_grad():
-                        test_loss, test_score = iterloop(config, writer, epoch, model, criterion, test_loader, metric, mode='val')
+                        test_loss, test_score = iterloop(config, writer, resume['epoch'], model, criterion, test_loader, metric, mode='val')
                     writer.add_scalar('test/loss', test_loss, resume['epoch'])
                     writer.add_scalar('test/WER', test_score, resume['epoch'])
                     return
@@ -203,7 +201,7 @@ def main(config):
     model = model.to(device)
     model.eval()
     with torch.no_grad():
-        test_loss, test_score = iterloop(config, writer, epoch, model, criterion, test_loader, metric, mode='val')
+        test_loss, test_score = iterloop(config, writer, resume['epoch'], model, criterion, test_loader, metric, mode='val')
     writer.add_scalar('test/loss', test_loss, resume['epoch'])
     writer.add_scalar('test/WER', test_score, resume['epoch'])
     
