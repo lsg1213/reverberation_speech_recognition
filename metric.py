@@ -10,7 +10,6 @@ class WER():
     def __call__(self, inputs, label):
         score = 0
         for i, j in zip(inputs.tolist(), label):
-            import pdb; pdb.set_trace()
             score += self.wer(self.wordmodel.decode(i), j)
         return score / len(label)
 
